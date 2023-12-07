@@ -19,6 +19,7 @@ function main_click(e) {
     } else {
         if (active) {
             ellapsed_time += Date.now() - start_time;
+            set_display_time(ellapsed_time);
         } else {
             start_time = Date.now()
         }

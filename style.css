@@ -10,7 +10,7 @@
 body {
     display: grid;
     grid-template-areas: "title" "circle" "stopstart";
-    grid-template-rows: 10% 80% 20%;
+    grid-template-rows: 10% 75% 25%;
     height: 100vh;
     height: calc(var(--vh, 1vh) * 100);
     overflow: hidden;
@@ -47,7 +47,7 @@ body {
 }
 
 .button {
-    --size: min(15vw, 15vh);
+    --size: min(20vw, 20vh);
     width: var(--size);
     height: var(--size);
     border-radius: 50%;
