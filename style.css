@@ -1,0 +1,60 @@
+:root {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --color: hsl(451, 10%, 80%);
+    --accent: hsl(451, 50%, 50%);
+    --background: hsl(451, 10%, 10%);
+    background-color: var(--background);
+    color: var(--color);
+}
+
+body {
+    display: grid;
+    grid-template-areas: "title" "circle" "stopstart";
+    grid-template-rows: 10% auto 10%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#title {
+    font-size: 3em;
+}
+
+#circle {
+    text-align: center;
+    margin: auto;
+}
+
+#time_circle {
+    --size: min(85vw, 85vh);
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background-color: var(--background);
+    border: 4px solid var(--accent);
+    cursor: pointer;
+    margin: auto;
+}
+
+#time {
+    font-size: 4em;
+    line-height: var(--size);
+}
+
+#controls {
+    text-align: center;
+}
+
+.button {
+    --size: min(15vw, 15vh);
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background-color: var(--accent);
+    display: inline-block;
+    cursor: pointer;
+    color: white;
+}
+
+.button img {
+    filter: invert(100%);
+}
