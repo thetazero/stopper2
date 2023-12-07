@@ -10,9 +10,11 @@
 body {
     display: grid;
     grid-template-areas: "title" "circle" "stopstart";
-    grid-template-rows: 10% auto 10%;
+    grid-template-rows: 10% 80% 20%;
     height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
     overflow: hidden;
+    margin: 0px;
 }
 
 #title {
