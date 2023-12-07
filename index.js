@@ -6,7 +6,8 @@ let max_ellapsed_time = 5000; // ms
 let ellapsed_time = 0;
 let game_state = 'inactive';
 
-function main_click() {
+function main_click(e) {
+    e.preventDefault();
     if (game_state === 'game_over') {
         game_state = 'inactive';
         set_accent(accent.inactive);
