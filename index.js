@@ -28,6 +28,14 @@ function main_click(e) {
     }
 }
 
+function reset_click(e) {
+    e.preventDefault();
+    game_state = 'inactive';
+    set_accent(accent.inactive);
+    ellapsed_time = 0;
+    set_display_time(ellapsed_time);
+}
+
 function set_display_time(time) {
     timeElem.innerText = (time / 1000).toFixed(3);
 }
@@ -71,6 +79,10 @@ fix_window_sizing()
 
 document.querySelectorAll('.main_click').forEach(elem => {
     elem.addEventListener('touchstart', main_click)
+})
+
+document.querySelectorAll('.reset_click').forEach(elem => {
+    elem.addEventListener('touchstart', reset_click)
 })
 
 set_accent(accent.inactive);
