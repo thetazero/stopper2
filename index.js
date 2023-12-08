@@ -17,6 +17,7 @@ const state = {
     },
     set game_state(val) {
         if (val === 'setup') {
+            set_accent(accent.inactive);
             playerCountElem.style.display = 'block';
             gameElem.style.display = 'none';
         } else {
@@ -59,6 +60,9 @@ const state = {
     get player_count() {
         return this._players.length;
     },
+    get alive_player_count() {
+        return this._players.filter(p => p).length;
+    },
     set player_count(val) {
         this._players = new Array(val).fill(true)
         console.log(this._players)
@@ -93,11 +97,15 @@ function kill_player(idx) {
 }
 
 function next_player() {
-    console.log('next player')
+    if (state.alive_player_count <= 1) {
+        state.game_state = 'setup';
+        return;
+    }
     let idx = state.active_player;
+    let count = 0;
     while (true) {
         idx++;
-        console.log(idx);
+        count++;
         if (idx >= state.player_count) {
             idx = 0;
         }
@@ -105,7 +113,6 @@ function next_player() {
             break;
         }
     }
-    console.log(idx);
     state.active_player = idx;
 }
 
