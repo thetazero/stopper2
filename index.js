@@ -58,7 +58,7 @@ const state = {
             state.total_time = max_time
             state.game_state = 'game_over';
             kill_player(state.active_player);
-            next_player();
+            next_player(-1);
         }
         this._time = val;
         timeElem.innerText = (val / 1000).toFixed(3);
@@ -106,7 +106,7 @@ function kill_player(idx) {
     playerBlocks[idx].classList.add('dead');
 }
 
-function next_player() {
+function next_player(dir = 1) {
     if (state.alive_player_count <= 1) {
         state.game_state = 'setup';
         return;
@@ -114,7 +114,7 @@ function next_player() {
     let idx = state.active_player;
     let count = 0;
     while (true) {
-        idx++;
+        idx += dir;
         count++;
         if (idx >= state.player_count) {
             idx = 0;
