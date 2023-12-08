@@ -32,6 +32,7 @@ function reset_click(e) {
     e.preventDefault();
     game_state = 'inactive';
     set_accent(accent.inactive);
+    active = false
     ellapsed_time = 0;
     set_display_time(ellapsed_time);
 }
