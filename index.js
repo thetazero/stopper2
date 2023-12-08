@@ -129,6 +129,7 @@ function next_player() {
 let playerBlocks = [];
 function render_player_count(count) {
     playerBlocksElem.innerHTML = '';
+    playerBlocks = [];
     for (let i = 0; i < count; i++) {
         let block = document.createElement('div');
         block.classList.add('player-block');
