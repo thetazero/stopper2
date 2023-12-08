@@ -1,31 +1,55 @@
 const timeElem = document.getElementById('time');
 
 let active = false;
-let start_time = Date.now();
-let max_ellapsed_time = 5000; // ms
-let ellapsed_time = 0;
+let last_time = Date.now();
 let game_state = 'inactive';
+
+const max_time = 5000;
+
+const state = {
+    _game_state: 'inactive',
+    get game_state() {
+        return this._game_state;
+    },
+    set game_state(val) {
+        if (val === 'game_over') {
+            active = false;
+            set_accent(accent.game_over);
+        } else if (val === 'active') {
+            set_accent(accent.active);
+            this.time_remaining = max_time;
+            active = true;
+        } else if (val === 'inactive') {
+            set_accent(accent.inactive);
+            active = false;
+        }
+        this._game_state = val;
+    },
+    _time_remaining: 0,
+    get time_remaining() {
+        return this._time_remaining;
+    },
+    set time_remaining(val) {
+        this._time_remaining = val;
+        timeElem.innerText = (val / 1000).toFixed(3);
+    },
+}
 
 function main_click(e) {
     e.preventDefault();
-    if (game_state === 'game_over') {
-        game_state = 'inactive';
-        set_accent(accent.inactive);
-    } else if (game_state === 'inactive') {
-        game_state = 'active';
-        set_accent(accent.active);
-        start_time = Date.now();
-        active = true;
+    if (state.game_state === 'game_over') {
+        state.game_state = 'inactive';
+    } else if (state.game_state === 'inactive') {
+        state.game_state = 'active';
     } else {
         if (active) {
-            ellapsed_time += Date.now() - start_time;
-            set_display_time(ellapsed_time);
-        } else {
-            start_time = Date.now()
+            let delta_time = Date.now() - last_time;
+            state.time_remaining -= delta_time;
         }
 
         active = !active;
     }
+    last_time = Date.now()
 }
 
 function set_display_time(time) {
@@ -44,20 +68,19 @@ const accent = {
 
 setInterval(() => {
     if (!active) return;
-    let cur_ellapsed_time = Date.now() - start_time;
+    let delta_time = Date.now() - last_time;
 
-    let total_time = cur_ellapsed_time + ellapsed_time;
+    state.time_remaining -= delta_time;
+    console.log(state.time_remaining, delta_time)
 
-    set_display_time(total_time);
-
-    if (total_time > max_ellapsed_time) {
+    if (state.time_remaining < 0) {
+        state.time_remaining = -1;
         active = false;
-        set_display_time(0);
-        ellapsed_time = 0;
-        game_state = 'game_over';
-        set_accent(accent.game_over);
+        state.total_time = max_time
+        state.game_state = 'game_over';
     }
-}, 1)
+    last_time = Date.now();
+}, 5)
 
 window.addEventListener('resize', () => {
     fix_window_sizing()
@@ -74,3 +97,5 @@ document.querySelectorAll('.main_click').forEach(elem => {
 })
 
 set_accent(accent.inactive);
+
+state.time_remaining = max_time;
