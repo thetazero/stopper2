@@ -1,10 +1,5 @@
 // Time Utility
-let timefn;
-if (typeof performance === 'undefined') {
-    timefn = Date.now;
-} else {
-    timefn = performance.now.bind(performance);
-}
+const timefn = performance.now.bind(performance);
 
 // Elements
 const timeElem = document.getElementById('time');
@@ -13,18 +8,28 @@ const playerCountElem = document.getElementById('player_count');
 const playerCountInputElem = document.querySelector('#player_count input');
 const playerBlocksElem = document.querySelector('.player-blocks-container');
 
-let active = false;
-let last_time = timefn();
-let game_state = 'setup';
+let game;
 
-const max_time = 5000;
+class BaseGame {
+    constructor(playerCount) {
+        this._state = 'setup';
+        this._time = 0;
+        this._players = new Array(playerCount).fill(true);
+        render_player_count(playerCount);
 
-const state = {
-    _game_state: 'inactive',
-    get game_state() {
-        return this._game_state;
-    },
-    set game_state(val) {
+        this._active_player = 0;
+        this.active_player = 0;
+
+        this.last_time = timefn();
+        this.active = false;
+        this.max_time = 5000;
+    }
+
+    get state() {
+        return this._state;
+    }
+
+    set state(val) {
         if (val === 'setup') {
             set_accent(accent.inactive);
             playerCountElem.style.display = 'block';
@@ -34,96 +39,93 @@ const state = {
             gameElem.style.display = 'grid';
         }
         if (val === 'game_over') {
-            active = false;
+            this.active = false;
             set_accent(accent.game_over);
         } else if (val === 'active') {
             set_accent(accent.active);
             this.time = 0;
-            active = true;
+            this.active = true;
         } else if (val === 'inactive') {
             set_accent(accent.inactive);
             this.time = 0;
-            active = false;
+            this.active = false;
         }
-        this._game_state = val;
-    },
-    _time: 0,
+        this._state = val;
+    }
+
     get time() {
         return this._time;
-    },
+    }
+
     set time(val) {
-        if (val > max_time) {
-            val = max_time + 1;
-            active = false;
-            state.total_time = max_time
-            state.game_state = 'game_over';
-            kill_player(state.active_player);
-            next_player(-1);
+        if (val > game.max_time) {
+            this.active = false;
+            this.state = 'game_over';
+            kill_player(this.active_player);
+            this.next_player(-1);
         }
         this._time = val;
-        timeElem.innerText = (val / 1000).toFixed(3);
-    },
-    _players: [],
+        render_time(val);
+    }
+
     get players() {
         return this._players;
-    },
-    get player_count() {
-        return this._players.length;
-    },
-    get alive_player_count() {
-        return this._players.filter(p => p).length;
-    },
-    set player_count(val) {
-        this._players = new Array(val).fill(true)
-        console.log(this._players)
-        render_player_count(val);
-        set_active_player(0);
-    },
-    _active_player: 0,
+    }
+
     get active_player() {
         return this._active_player;
-    },
-    set active_player(val) {
-        this._active_player = val;
-        set_active_player(val);
+    }
+
+    set active_player(idx) {
+        this._active_player = idx;
+        playerBlocks.forEach((block, i) => {
+            if (i === idx) {
+                block.classList.add('active');
+            } else {
+                block.classList.remove('active');
+            }
+        })
+    }
+
+    alive_player_count() {
+        return count_alive_players(this._players);
+    }
+
+    next_player(dir = 1) {
+        if (this.alive_player_count() <= 1) {
+            this.state = 'setup'
+            return;
+        }
+        let idx = this.active_player;
+        let count = 0;
+        while (true) {
+            idx = wrap_index(idx + dir, this.players.length)
+            count++;
+            if (count > this.players.length) {
+                idx = 0;
+                console.log('we shouldnt ahve gotten here')
+                break;
+            }
+            if (game.players[idx]) {
+                break;
+            }
+        }
+        game.active_player = idx;
     }
 }
 
-function set_active_player(idx) {
-    state._active_player = idx;
-    playerBlocks.forEach((block, i) => {
-        if (i === idx) {
-            block.classList.add('active');
-        } else {
-            block.classList.remove('active');
-        }
-    })
+function wrap_index(i, n) {
+    return ((i % n) + n) % n
+}
+
+function count_alive_players(players) {
+    return players.filter(p => p).length;
 }
 
 function kill_player(idx) {
-    state._players[idx] = false;
+    game._players[idx] = false;
     playerBlocks[idx].classList.remove('alive');
     playerBlocks[idx].classList.add('dead');
-}
-
-function next_player(dir = 1) {
-    if (state.alive_player_count <= 1) {
-        state.game_state = 'setup';
-        return;
-    }
-    let idx = state.active_player;
-    let count = 0;
-    while (true) {
-        idx += dir;
-        count++;
-        if (idx >= state.player_count) {
-            idx = 0;
-        }
-        if (state.players[idx]) {
-            break;
-        }
-    }
-    state.active_player = idx;
 }
 
 let playerBlocks = [];
@@ -142,37 +144,35 @@ function render_player_count(count) {
 
 function main_click(e) {
     e.preventDefault();
-    if (state.game_state === 'game_over') {
-        state.game_state = 'inactive';
-    } else if (state.game_state === 'inactive') {
-        state.game_state = 'active';
+    if (game.state === 'game_over') {
+        game.state = 'inactive';
+    } else if (game.state === 'inactive') {
+        game.state = 'active';
     } else {
-        if (active) {
+        if (game.active) {
             let delta_time = timefn() - last_time;
-            state.time += delta_time;
-            next_player();
+            game.time += delta_time;
+            game.next_player();
         }
 
-        active = !active;
+        game.active = !game.active;
     }
     last_time = timefn()
 }
 
 function reset_click(e) {
     e.preventDefault();
-    state.game_state = 'setup';
+    game.state = 'setup'
     set_accent(accent.inactive);
-    active = false
-    state.time = 0;
-    set_display_time(ellapsed_time);
 }
 
 function start_game() {
-    state.game_state = 'inactive';
-    state.player_count = parseInt(playerCountInputElem.value);
+    player_count = parseInt(playerCountInputElem.value);
+    game = new BaseGame(player_count);
+    game.state = 'inactive'
 }
 
-function set_display_time(time) {
+function render_time(time) {
     timeElem.innerText = (time / 1000).toFixed(3);
 }
 
@@ -187,10 +187,10 @@ const accent = {
 }
 
 setInterval(() => {
-    if (!active) return;
+    if (!game || !game.active) return;
     let delta_time = timefn() - last_time;
 
-    state.time += delta_time;
+    game.time += delta_time;
     last_time = timefn();
 }, 5)
 
@@ -206,11 +206,10 @@ fix_window_sizing()
 
 document.querySelectorAll('.main_click').forEach(elem => {
     elem.addEventListener('touchstart', main_click)
+    elem.addEventListener('click', main_click)
 })
 
 document.querySelectorAll('.reset_click').forEach(elem => {
     elem.addEventListener('touchstart', reset_click)
+    elem.addEventListener('click', main_click)
 })
-
-set_accent(accent.inactive);
-state.time = 0;
