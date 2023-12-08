@@ -160,10 +160,10 @@ function main_click(e) {
 
 function reset_click(e) {
     e.preventDefault();
-    game_state = 'inactive';
+    state.game_state = 'setup';
     set_accent(accent.inactive);
     active = false
-    ellapsed_time = 0;
+    state.time = 0;
     set_display_time(ellapsed_time);
 }
 
