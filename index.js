@@ -1,3 +1,12 @@
+// Time Utility
+let timefn;
+if (typeof performance === 'undefined') {
+    timefn = Date.now;
+} else {
+    timefn = performance.now.bind(performance);
+}
+
+// Elements
 const timeElem = document.getElementById('time');
 const gameElem = document.getElementById('game');
 const playerCountElem = document.getElementById('player_count');
@@ -5,7 +14,7 @@ const playerCountInputElem = document.querySelector('#player_count input');
 const playerBlocksElem = document.querySelector('.player-blocks-container');
 
 let active = false;
-let last_time = Date.now();
+let last_time = timefn();
 let game_state = 'setup';
 
 const max_time = 5000;
@@ -33,6 +42,7 @@ const state = {
             active = true;
         } else if (val === 'inactive') {
             set_accent(accent.inactive);
+            this.time = 0;
             active = false;
         }
         this._game_state = val;
@@ -137,14 +147,14 @@ function main_click(e) {
         state.game_state = 'active';
     } else {
         if (active) {
-            let delta_time = Date.now() - last_time;
+            let delta_time = timefn() - last_time;
             state.time += delta_time;
             next_player();
         }
 
         active = !active;
     }
-    last_time = Date.now()
+    last_time = timefn()
 }
 
 function reset_click(e) {
@@ -177,10 +187,10 @@ const accent = {
 
 setInterval(() => {
     if (!active) return;
-    let delta_time = Date.now() - last_time;
+    let delta_time = timefn() - last_time;
 
     state.time += delta_time;
-    last_time = Date.now();
+    last_time = timefn();
 }, 5)
 
 window.addEventListener('resize', () => {
