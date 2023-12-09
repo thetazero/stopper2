@@ -53,17 +53,21 @@ class BaseGame {
         this._state = val;
     }
 
-    get time() {
-        return this._time;
-    }
-
-    set time(val) {
-        if (val > game.max_time) {
+    tick(delta_time) {
+        this.time += delta_time;
+        if (this.time > game.max_time) {
             this.active = false;
             this.state = 'game_over';
             kill_player(this.active_player);
             this.next_player(-1);
         }
+    }
+
+    get time() {
+        return this._time;
+    }
+
+    set time(val) {
         this._time = val;
         render_time(val);
     }
@@ -99,11 +103,11 @@ class BaseGame {
         let idx = this.active_player;
         let count = 0;
         while (true) {
-            idx = wrap_index(idx + dir, this.players.length)
+            idx = wrap_index(idx + dir, this.players.length);
             count++;
             if (count > this.players.length) {
                 idx = 0;
-                console.log('we shouldnt ahve gotten here')
+                console.log('we shouldnt ahve gotten here');
                 break;
             }
             if (game.players[idx]) {
@@ -111,6 +115,10 @@ class BaseGame {
             }
         }
         game.active_player = idx;
+    }
+
+    clock_ticking() {
+        return game.active && (game.state == 'active');
     }
 }
 
@@ -149,9 +157,9 @@ function main_click(e) {
     } else if (game.state === 'inactive') {
         game.state = 'active';
     } else {
-        if (game.active) {
+        if (game && game.clock_ticking()) {
             let delta_time = timefn() - last_time;
-            game.time += delta_time;
+            game.tick(delta_time);
             game.next_player();
         }
 
@@ -187,10 +195,10 @@ const accent = {
 }
 
 setInterval(() => {
-    if (!game || !game.active) return;
+    if (!game || !game.clock_ticking()) return;
     let delta_time = timefn() - last_time;
 
-    game.time += delta_time;
+    game.tick(delta_time);
     last_time = timefn();
 }, 5)
 
