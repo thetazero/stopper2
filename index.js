@@ -8,7 +8,64 @@ const playerCountElem = document.getElementById('player_count');
 const playerCountInputElem = document.querySelector('#player_count input');
 const playerBlocksElem = document.querySelector('.player-blocks-container');
 
+const winScreenElem = document.getElementById('win');
+const winnerNameElem = document.getElementById('winner-name');
+
 let game;
+
+class ScreenManager {
+    constructor(screen) {
+        this._screenElems = {
+            'setup': playerCountElem,
+            'game': gameElem,
+            'win': winScreenElem,
+        }
+        this._callbacks = {
+            'setup': () => {
+                game = null;
+            },
+            'game': this.switch_to_game.bind(this),
+            'win': ({ winner }) => {
+                winnerNameElem.innerText = winner + 1;
+                game = null;
+            },
+        }
+        this.change_screen(screen);
+        this.game_settings = null;
+    }
+
+    change_screen(new_screen, args) {
+        for (let key in this._screenElems) {
+            this._screenElems[key].style.display = 'none';
+        }
+        if (this._screenElems[new_screen]) {
+            this._screenElems[new_screen].style.display = 'block';
+            if (args) {
+                this._callbacks[new_screen](args);
+            } else {
+                this._callbacks[new_screen]();
+            }
+        } else {
+            console.log(`Screen ${new_screen} does not exist`);
+        }
+        this.screen = new_screen;
+    }
+
+    restart_game() {
+        if (this.game_settings) {
+            this.change_screen('game', this.game_settings);
+        } else {
+            this.change_screen('setup');
+        }
+    }
+
+    switch_to_game(player_count) {
+        game = new BaseGame(player_count);
+        game.state = 'inactive'
+        this.game_settings = player_count;
+    }
+
+}
 
 class BaseGame {
     constructor(playerCount) {
@@ -30,17 +87,9 @@ class BaseGame {
     }
 
     set state(val) {
-        if (val === 'setup') {
-            set_accent(accent.inactive);
-            playerCountElem.style.display = 'block';
-            gameElem.style.display = 'none';
-        } else {
-            playerCountElem.style.display = 'none';
-            gameElem.style.display = 'grid';
-        }
-        if (val === 'game_over') {
+        if (val === 'dead') {
             this.active = false;
-            set_accent(accent.game_over);
+            set_accent(accent.red);
         } else if (val === 'active') {
             set_accent(accent.active);
             this.time = 0;
@@ -65,7 +114,18 @@ class BaseGame {
             this.active = false;
             this.state = 'game_over';
             kill_player(this.active_player);
+
+            if (this.alive_player_count() <= 1) {
+                let winner = this.get_first_alive_player();
+                screenManager.change_screen('win', { winner });
+                return;
+            }
+
+            this.active = false;
+            this.state = 'dead';
             this.next_player(-1);
+        } else if (click){
+            this.next_player();
         }
     }
 
@@ -101,11 +161,18 @@ class BaseGame {
         return count_alive_players(this._players);
     }
 
-    next_player(dir = 1) {
-        if (this.alive_player_count() <= 1) {
-            this.state = 'setup'
-            return;
+    get_first_alive_player() {
+        let idx = null;
+        for (let i = 0; i < this.players.length; i++) {
+            if (this.players[i]) {
+                idx = i;
+                break;
+            }
         }
+        return idx;
+    }
+
+    next_player(dir = 1) {
         let idx = this.active_player;
         let count = 0;
         while (true) {
@@ -113,7 +180,7 @@ class BaseGame {
             count++;
             if (count > this.players.length) {
                 idx = 0;
-                console.log('we shouldnt ahve gotten here');
+                console.log('we shouldnt have gotten here');
                 break;
             }
             if (game.players[idx]) {
@@ -181,7 +248,7 @@ function render_player_count(count) {
 
 function main_click(e) {
     e.preventDefault();
-    if (game.state === 'game_over') {
+    if (game.state === 'dead') {
         game.state = 'inactive';
     } else if (game.state === 'inactive') {
         game.state = 'active';
@@ -189,7 +256,6 @@ function main_click(e) {
         if (game && game.clock_ticking()) {
             let delta_time = timefn() - last_time;
             game.tick(delta_time, true);
-            game.next_player();
         }
 
         game.active = !game.active;
@@ -197,16 +263,17 @@ function main_click(e) {
     last_time = timefn()
 }
 
-function reset_click(e) {
-    e.preventDefault();
-    game.state = 'setup'
-    set_accent(accent.inactive);
+function setup_game() {
+    screenManager.change_screen('setup');
 }
 
 function start_game() {
     player_count = parseInt(playerCountInputElem.value);
-    game = new BaseGame(player_count);
-    game.state = 'inactive'
+    screenManager.change_screen('game', player_count);
+}
+
+function restart_game() {
+    screenManager.restart_game();
 }
 
 function render_time(time) {
@@ -218,7 +285,7 @@ function set_accent(color) {
 }
 
 const accent = {
-    game_over: 'hsl(0, 50%, 50%)',
+    red: 'hsl(0, 50%, 50%)',
     active: 'hsl(451, 50%, 50%)',
     inactive: 'hsl(451, 20%, 50%)',
 }
@@ -247,6 +314,8 @@ document.querySelectorAll('.main_click').forEach(elem => {
 })
 
 document.querySelectorAll('.reset_click').forEach(elem => {
-    elem.addEventListener('touchstart', reset_click)
-    elem.addEventListener('click', main_click)
+    elem.addEventListener('touchstart', setup_game)
+    elem.addEventListener('click', setup_game)
 })
+
+const screenManager = new ScreenManager('setup');
