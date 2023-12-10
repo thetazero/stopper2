@@ -104,15 +104,15 @@ class BaseGame {
 
     tick(delta_time, click) {
         this.time += delta_time;
-        if ((this.time > game.max_time - 100) && (this.time < game.max_time + 100) && click) {
+        if ((this.time / 1000).toFixed(3) === "5.000" && click) {
             console.log("5.000!");
             this.active = false;
-            this.state = 'game_over';
+            this.state = 'dead';
             kill_player(this.get_player(-1));
         }
         else if (this.time > game.max_time && click) {
             this.active = false;
-            this.state = 'game_over';
+            this.state = 'dead';
             kill_player(this.active_player);
 
             if (this.alive_player_count() <= 1) {
