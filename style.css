@@ -21,10 +21,12 @@ body {
     margin: 0px;
 }
 
-#game {
+.game-grid {
     display: grid;
     grid-template-areas: "player_blocks" "circle" "stopstart";
     grid-template-rows: 10% 75% 25%;
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
 }
 
 #player-blocks {
@@ -102,6 +104,16 @@ body {
     color: white;
 }
 
+.text-button {
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+    font-size: 1.8em;
+    display: inline-block;
+    padding: 15px;
+    margin: 15px;
+}
+
 .button img {
     filter: invert(100%);
 }
@@ -113,7 +125,7 @@ body {
 }
 
 .heading {
-    font-size: 2em;
+    font-size: 2.5em;
 }
 
 input[type=number] {
@@ -127,6 +139,11 @@ input[type=number] {
     margin: 10px;
 }
 
-.center {
+.centered {
     margin: auto;
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    width: 100vw;
+    transform: translate(0%, -50%);
 }
