@@ -113,7 +113,7 @@ class BaseGame {
         else if (this.time > game.max_time && click) {
             this.active = false;
             this.state = 'dead';
-            kill_player(this.active_player);
+            this.kill_player(this.active_player);
 
             if (this.alive_player_count() <= 1) {
                 let winner = this.get_first_alive_player();
@@ -124,7 +124,7 @@ class BaseGame {
             this.active = false;
             this.state = 'dead';
             this.next_player(-1);
-        } else if (click){
+        } else if (click) {
             this.next_player();
         }
     }
@@ -183,11 +183,11 @@ class BaseGame {
                 console.log('we shouldnt have gotten here');
                 break;
             }
-            if (game.players[idx]) {
+            if (this.players[idx]) {
                 break;
             }
         }
-        game.active_player = idx;
+        this.active_player = idx;
     }
 
     get_player(dir = 1) {
@@ -205,7 +205,7 @@ class BaseGame {
                 console.log('we shouldnt have gotten here');
                 break;
             }
-            if (game.players[idx]) {
+            if (this.players[idx]) {
                 break;
             }
         }
@@ -213,10 +213,32 @@ class BaseGame {
         return idx;
     }
 
+    kill_player(idx) {
+        this._players[idx] = false;
+        playerBlocks[idx].classList.remove('alive');
+        playerBlocks[idx].classList.add('dead');
+    }
+
     clock_ticking() {
-        return game.active && (game.state == 'active');
+        return this.active && (this.state == 'active');
     }
 }
+
+class SinglePlayer extends BaseGame {
+    constructor() {
+        super();
+    }
+}
+
+class Classic extends BaseGame {
+
+}
+
+class Modern extends BaseGame {
+    constructor(playerCount) {
+    }
+}
+
 
 function wrap_index(i, n) {
     return ((i % n) + n) % n
@@ -224,12 +246,6 @@ function wrap_index(i, n) {
 
 function count_alive_players(players) {
     return players.filter(p => p).length;
-}
-
-function kill_player(idx) {
-    game._players[idx] = false;
-    playerBlocks[idx].classList.remove('alive');
-    playerBlocks[idx].classList.add('dead');
 }
 
 let playerBlocks = [];
