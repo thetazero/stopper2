@@ -116,6 +116,8 @@ class BaseGame {
             this.active = false;
             this.state = 'dead';
             this.next_player(-1);
+        } else if (click){
+            this.next_player();
         }
     }
 
@@ -223,7 +225,6 @@ function main_click(e) {
         if (game && game.clock_ticking()) {
             let delta_time = timefn() - last_time;
             game.tick(delta_time, true);
-            game.next_player();
         }
 
         game.active = !game.active;
