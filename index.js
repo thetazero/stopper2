@@ -105,9 +105,16 @@ class BaseGame {
     tick(delta_time, click) {
         this.time += delta_time;
         if (this.time > game.max_time && click) {
+            kill_player(this.active_player);
+
+            if (this.alive_player_count() <= 1) {
+                let winner = this.get_first_alive_player();
+                screenManager.change_screen('win', { winner });
+                return;
+            }
+
             this.active = false;
             this.state = 'dead';
-            kill_player(this.active_player);
             this.next_player(-1);
         }
     }
@@ -156,11 +163,6 @@ class BaseGame {
     }
 
     next_player(dir = 1) {
-        if (this.alive_player_count() <= 1) {
-            let winner = this.get_first_alive_player();
-            screenManager.change_screen('win', { winner });
-            return;
-        }
         let idx = this.active_player;
         let count = 0;
         while (true) {
