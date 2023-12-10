@@ -12,23 +12,26 @@
 
 <body>
     <div id="game" class="full-screen" style="display: none;">
-        <div id="player_blocks">
-            <div class="player-blocks-container">
+        <div class="game-grid">
+            <div id="player_blocks">
+                <div class="player-blocks-container">
 
+                </div>
             </div>
-        </div>
-        <div id="circle">
-            <div id="time_circle" class="main_click">
-                <div id="time">5.000</div>
+            <div id="circle">
+                <div id="time_circle" class="main_click">
+                    <div id="time">5.000</div>
+                </div>
             </div>
-        </div>
-        <div id="controls">
-            <div class="button main_click" id="start">
-                <img src="./play.svg" width="100%">
+            <div id="controls">
+                <div class="button main_click" id="start">
+                    <img src="./play.svg" width="100%">
+                </div>
+                <div class="button reset_click" id="reset">
+                    <img src="./reset.svg" width="100%">
+                </div>
             </div>
-            <div class="button reset_click" id="reset">
-                <img src="./reset.svg" width="100%">
-            </div>
+
         </div>
     </div>
     <div id="player_count" class="full-screen">
@@ -40,6 +43,13 @@
                 <img src="./play.svg" width="100%">
             </div>
 
+        </div>
+    </div>
+    <div id="win" class="full-screen">
+        <div class="centered">
+            <div class="heading">Player <span id="winner-name"></span> wins!</div>
+            <div class="text-button" onclick="restart_game()">restart</div>
+            <div class="text-button" onclick="setup_game()">new game</div>
         </div>
     </div>
     <script src="index.js"></script>
