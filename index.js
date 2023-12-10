@@ -53,9 +53,9 @@ class BaseGame {
         this._state = val;
     }
 
-    tick(delta_time) {
+    tick(delta_time, click) {
         this.time += delta_time;
-        if (this.time > game.max_time) {
+        if (this.time > game.max_time && click) {
             this.active = false;
             this.state = 'game_over';
             kill_player(this.active_player);
@@ -159,7 +159,7 @@ function main_click(e) {
     } else {
         if (game && game.clock_ticking()) {
             let delta_time = timefn() - last_time;
-            game.tick(delta_time);
+            game.tick(delta_time, true);
             game.next_player();
         }
 
@@ -198,7 +198,7 @@ setInterval(() => {
     if (!game || !game.clock_ticking()) return;
     let delta_time = timefn() - last_time;
 
-    game.tick(delta_time);
+    game.tick(delta_time, false);
     last_time = timefn();
 }, 5)
 
