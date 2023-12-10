@@ -104,7 +104,15 @@ class BaseGame {
 
     tick(delta_time, click) {
         this.time += delta_time;
-        if (this.time > game.max_time && click) {
+        if ((this.time / 1000).toFixed(3) === "5.000" && click) {
+            console.log("5.000!");
+            this.active = false;
+            this.state = 'dead';
+            kill_player(this.get_player(-1));
+        }
+        else if (this.time > game.max_time && click) {
+            this.active = false;
+            this.state = 'dead';
             kill_player(this.active_player);
 
             if (this.alive_player_count() <= 1) {
@@ -180,6 +188,29 @@ class BaseGame {
             }
         }
         game.active_player = idx;
+    }
+
+    get_player(dir = 1) {
+        if (this.alive_player_count() <= 1) {
+            this.state = 'setup'
+            return;
+        }
+        let idx = this.active_player;
+        let count = 0;
+        while (true) {
+            idx = wrap_index(idx + dir, this.players.length);
+            count++;
+            if (count > this.players.length) {
+                idx = 0;
+                console.log('we shouldnt have gotten here');
+                break;
+            }
+            if (game.players[idx]) {
+                break;
+            }
+        }
+        console.log(idx);
+        return idx;
     }
 
     clock_ticking() {
